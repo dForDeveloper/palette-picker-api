@@ -8,9 +8,10 @@ const getProjectByQuery = async (req, res) => {
   res.sendStatus(404);
 }
 
-const getProjects = async (req, res) => {
-  const projects = await db('projects').select();
-  res.status(200).json(projects);
+const getPalettes = async (req, res) => {
+  const { id: project_id } = req.params;
+  const palettes = await db('palettes').where({ project_id });
+  res.status(200).json(palettes);
 }
 
 const postToProjects = async (req, res) => {
@@ -26,7 +27,7 @@ const postToPalettes = async (req, res) => {
 
 module.exports = {
   getProjectByQuery,
-  getProjects,
+  getPalettes,
   postToProjects,
   postToPalettes
 }
