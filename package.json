@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
-    "test": "jest --passWithNoTests"
+    "test": "jest --forceExit",
+    "testwatch": "jest --watchAll",
+    "migrate": "knex migrate:latest --env=test",
+    "seed": "knex seed:run --env=test"
   },
   "keywords": [],
   "author": "",
