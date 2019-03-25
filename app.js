@@ -43,9 +43,8 @@ app.get('/api/v1/projects?', async (req, res) => {
 app.get('/api/v1/projects/:id/palettes', async (req, res) => {
   try {
     const { id: project_id } = req.params;
-    const columns = ['id', ...paletteParams]
     const palettes = await db('palettes')
-      .column(columns)
+      .column(['id', ...paletteParams])
       .where({ project_id });
     if (!palettes.length) return res.sendStatus(404);
     res.status(200).json(palettes);
