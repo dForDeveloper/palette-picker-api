@@ -2,6 +2,16 @@ const environment = process.env.NODE_ENV || 'development';
 const configuration = require('../knexfile')[environment];
 const db = require('knex')(configuration);
 
+const paletteParams = [
+  'name',
+  'color1',
+  'color2',
+  'color3',
+  'color4',
+  'color5',
+  'project_id'
+];
+
 const getProjects = async (req, res) => {
   try {
     for (param in req.query) {
@@ -13,11 +23,11 @@ const getProjects = async (req, res) => {
     }
     let projects;
     if (req.query.name) {
-      projects = await db('projects').where(req.query);
+      projects = await db('projects').column(['id', 'name']).where(req.query);
     } else {
-      projects = await db('projects').select();
+      projects = await db('projects').column(['id', 'name']).select();
     }
-    if (projects.length === 0) return res.sendStatus(404);
+    if (!projects.length) return res.sendStatus(404);
     res.status(200).json(projects);
   } catch {
     res.sendStatus(500);
@@ -27,8 +37,11 @@ const getProjects = async (req, res) => {
 const getPalettes = async (req, res) => {
   try {
     const { id: project_id } = req.params;
-    const palettes = await db('palettes').where({ project_id });
-    if (palettes.length == 0) return res.sendStatus(404);
+    const columns = ['id', ...paletteParams]
+    const palettes = await db('palettes')
+      .column(columns)
+      .where({ project_id });
+    if (!palettes.length) return res.sendStatus(404);
     res.status(200).json(palettes);
   } catch {
     res.sendStatus(500);
@@ -37,8 +50,9 @@ const getPalettes = async (req, res) => {
 
 const postToProjects = async (req, res) => {
   try {
-    if (!req.body.name) return res.status(422).json('name missing from body');
-    const [id] = await db('projects').insert(req.body, 'id');
+    const { name } = req.body;
+    if (!name) return res.status(422).json('Please provide a name.');
+    const [id] = await db('projects').insert({ name }, 'id');
     res.status(201).json({ id });
   } catch {
     res.sendStatus(500);
@@ -48,20 +62,20 @@ const postToProjects = async (req, res) => {
 const postToPalettes = async (req, res) => {
   try {
     const palette = req.body;
-    const requiredParams = [
-      'name',
-      'color1',
-      'color2',
-      'color3',
-      'color4',
-      'color5',
-      'project_id'
-    ];
-    for (let param of requiredParams) {
+    for (let param of paletteParams) {
       if (!palette[param]) {
-        return res.status(422).json(
-          `Parameters must be exactly ${requiredParams.join(' ')}.`
+        const message = (
+          'Request body must include ' +
+          'name: <string>, ' +
+          'color1: <string>, ' +
+          'color2: <string>, ' +
+          'color3: <string>, ' +
+          'color4: <string>, ' +
+          'color5: <string>, ' +
+          'and project_id: <number>. ' +
+          `Please provide ${param}.`
         );
+        return res.status(422).json(message);
       }
     }
     const [id] = await db('palettes').insert(palette, 'id');
@@ -73,37 +87,54 @@ const postToPalettes = async (req, res) => {
 
 const patchProject = async (req, res) => {
   try {
-    const { id, editedName } = req.body;
-    await db('projects').where({ id }).update({ name: editedName });
-    res.sendStatus(204);
+    const { id } = req.params;
+    const { name } = req.body;
+    if (!name) return res.status(422).json('Please provide a name.');
+    const foundProjects = await db('projects').where({ id });
+    if (!foundProjects.length) return res.sendStatus(404);
+    await db('projects').where({ id }).update({ name });
+    res.sendStatus(202);
   } catch {
-    res.sendStatus(500);    
+    res.sendStatus(500);
   }
 }
 
 const patchPalette = async (req, res) => {
   try {
-    const { id, editedName } = req.body;
-    await db('palettes').where({ id }).update({ name: editedName });
-    res.sendStatus(204);
+    const { id } = req.params;
+    const { name } = req.body;
+    if (!name) return res.status(422).json('Please provide a name.');
+    const foundPalettes = await db('palettes').where({ id });
+    if (!foundPalettes.length) return res.sendStatus(404);
+    await db('palettes').where({ id }).update({ name });
+    res.sendStatus(202);
   } catch {
-    res.sendStatus(500);    
+    res.sendStatus(500);
   }
 }
 
 const deleteProject = async (req, res) => {
   try {
-    res.sendStatus(200).json('placeholder response')
+    const { id } = req.params;
+    const foundProjects = await db('projects').where({ id });
+    if (!foundProjects.length) return res.sendStatus(404);
+    await db('palettes').where({ project_id: id }).del();
+    await db('projects').where({ id }).del();
+    res.sendStatus(204);
   } catch {
-    res.sendStatus(500);    
+    res.sendStatus(500);
   }
 }
 
 const deletePalette = async (req, res) => {
   try {
-    res.sendStatus(200).json('placeholder response')
+    const { id } = req.params;
+    const foundPalettes = await db('palettes').where({ id });
+    if (!foundPalettes.length) return res.sendStatus(404);
+    await db('palettes').where({ id }).del();
+    res.sendStatus(204);
   } catch {
-    res.sendStatus(500);    
+    res.sendStatus(500);
   }
 }
 
