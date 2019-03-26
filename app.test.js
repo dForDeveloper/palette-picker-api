@@ -67,4 +67,22 @@ describe('queries', () => {
       expect(response.status).toEqual(404);
     });
   });
+
+  describe('POST /api/v1/projects', () => {
+    it('should return 201 and the project id', async () => {
+      const response = await request(app)
+        .post('/api/v1/projects')
+        .send({ name: 'project c'});
+      const projects = await db('projects').select();
+      expect(response.status).toEqual(201);
+      expect(projects.pop().id).toEqual(response.body.id);
+    });
+
+    it('should return 422 if no name is sent', async () => {
+      const response = await request(app)
+        .post('/api/v1/projects')
+        .send({});
+      expect(response.status).toEqual(422);
+    });
+  });
 });
