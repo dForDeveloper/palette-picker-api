@@ -199,4 +199,34 @@ describe('queries', () => {
       expect(response.status).toEqual(404);
     });
   });
+
+  describe('DELETE /api/v1/projects/:id', () => {
+    it('should return 204 if a project matches the id', async () => {
+      const { id } = await db('projects').first();
+      const response = await request(app).delete(`/api/v1/projects/${id}`);
+      expect(response.status).toEqual(204);
+    });
+
+    it('should remove a project from the database', async () => {
+      const { id } = await db('projects').first();
+      const projectsBefore = await db('projects').select();
+      await request(app).delete(`/api/v1/projects/${id}`);
+      const projectsAfter = await db('projects').select();
+      expect(projectsAfter.length).toEqual(projectsBefore.length - 1);
+    });
+
+    it('should remove associated palettes from the database', async () => {
+      const { id } = await db('projects').first();
+      const palettesBefore = await db('palettes').where({ project_id: id });
+      expect(palettesBefore.length).not.toEqual(0);
+      await request(app).delete(`/api/v1/projects/${id}`);
+      const palettesAfter = await db('palettes').where({ project_id: id });
+      expect(palettesAfter.length).toEqual(0);
+    });
+
+    it('should return 404 if no project is found', async () => {
+      const response = await request(app).delete('/api/v1/projects/0');
+      expect(response.status).toEqual(404);
+    });
+  });
 });
