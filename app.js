@@ -18,22 +18,9 @@ const paletteParams = [
   'project_id'
 ];
 
-app.get('/api/v1/projects?', async (req, res) => {
+app.get('/api/v1/projects', async (req, res) => {
   try {
-    for (param in req.query) {
-      if (param !== 'name') {
-        return res.status(422).json(
-          `'name' is the only valid query parameter. ${param} is invalid.`
-        );
-      }
-    }
-    let projects;
-    if (req.query.name) {
-      projects = await db('projects').column(['id', 'name']).where(req.query);
-    } else {
-      projects = await db('projects').column(['id', 'name']).select();
-    }
-    if (!projects.length) return res.sendStatus(404);
+    projects = await db('projects').column(['id', 'name']).select();
     res.status(200).json(projects);
   } catch {
     res.sendStatus(500);
