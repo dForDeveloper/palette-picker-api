@@ -114,4 +114,31 @@ describe('queries', () => {
       expect(response.status).toEqual(422);
     });
   });
+
+  describe('PATCH /api/v1/projects/:id', () => {
+    it('should return 202 if the correct params are sent', async () => {
+      const firstProject = await db('projects').first();
+      const { id } = firstProject;
+      const response = await request(app)
+        .patch(`/api/v1/projects/${id}`)
+        .send({ name: 'new project name' });
+      expect(response.status).toEqual(202);
+    });
+
+    it('should return 422 if the name param is not sent', async () => {
+      const firstProject = await db('projects').first();
+      const { id } = firstProject;
+      const response = await request(app)
+        .patch(`/api/v1/projects/${id}`)
+        .send({});
+      expect(response.status).toEqual(422);
+    });
+
+    it('should return 404 if no project is found', async () => {
+      const response = await request(app)
+      .patch(`/api/v1/projects/0`)
+      .send({ name: 'new project name' });
+      expect(response.status).toEqual(404);
+    });
+  });
 });
