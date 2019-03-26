@@ -51,8 +51,7 @@ describe('queries', () => {
     ];
 
     it('should return 200 and all match palettes', async () => {
-      const firstProject = await db('projects').first();
-      const { id: project_id } = firstProject;
+      const { id: project_id } = await db('projects').first();
       const expected = await db('palettes')
         .column(['id', ...paletteParams])
         .where({ project_id });
@@ -73,9 +72,15 @@ describe('queries', () => {
       const response = await request(app)
         .post('/api/v1/projects')
         .send({ name: 'project c'});
-      const projects = await db('projects').select();
       expect(response.status).toEqual(201);
-      expect(projects.pop().id).toEqual(response.body.id);
+      expect(response.body).toHaveProperty('id');
+    });
+
+    it('should add a project to the database', async () => {
+      const projectsBefore = await db('projects').select();
+      await request(app).post('/api/v1/projects').send({ name: 'project c'});
+      const projectsAfter = await db('projects').select();
+      expect(projectsAfter.length).toEqual(projectsBefore.length + 1);
     });
 
     it('should return 422 if no name is sent', async () => {
@@ -87,10 +92,11 @@ describe('queries', () => {
   });
 
   describe('POST /api/v1/palettes', () => {
-    it('should return 201 and the palette id', async () => {
-      const firstProject = await db('projects').first();
-      const { id: project_id } = firstProject;
-      const mockPalette = {
+    let mockPalette;
+
+    beforeEach(async () => {
+      const { id: project_id } = await db('projects').first();
+      mockPalette = {
         name: 'palette q',
         color1: '#000000',
         color2: '#000000',
@@ -99,12 +105,21 @@ describe('queries', () => {
         color5: '#000000',
         project_id
       };
+    });
+
+    it('should return 201 and the palette id', async () => {
       const response = await request(app)
         .post('/api/v1/palettes')
         .send(mockPalette);
-      const palettes = await db('palettes').select();
       expect(response.status).toEqual(201);
-      expect(palettes.pop().id).toEqual(response.body.id);
+      expect(response.body).toHaveProperty('id');
+    });
+
+    it('should add a palette to the database', async () => {
+      const palettesBefore = await db('palettes').select();
+      await request(app).post('/api/v1/palettes').send(mockPalette);
+      const palettesAfter = await db('palettes').select();
+      expect(palettesAfter.length).toEqual(palettesBefore.length + 1);
     });
 
     it('should return 422 if the correct params are missing', async () => {
@@ -117,17 +132,25 @@ describe('queries', () => {
 
   describe('PATCH /api/v1/projects/:id', () => {
     it('should return 202 if the correct params are sent', async () => {
-      const firstProject = await db('projects').first();
-      const { id } = firstProject;
+      const { id } = await db('projects').first();
       const response = await request(app)
         .patch(`/api/v1/projects/${id}`)
         .send({ name: 'new project name' });
       expect(response.status).toEqual(202);
     });
 
+    it('should edit the name of a project in the database', async () => {
+      const expected = await db('projects').first();
+      expect(expected.name).not.toEqual('new project name');
+      await request(app)
+        .patch(`/api/v1/projects/${expected.id}`)
+        .send({ name: 'new project name' });
+      const [result] = await db('projects').where({ id: expected.id });
+      expect(result.name).toEqual('new project name');
+    });
+
     it('should return 422 if the name param is not sent', async () => {
-      const firstProject = await db('projects').first();
-      const { id } = firstProject;
+      const { id } = await db('projects').first();
       const response = await request(app)
         .patch(`/api/v1/projects/${id}`)
         .send({});
@@ -144,17 +167,25 @@ describe('queries', () => {
     
   describe('PATCH /api/v1/palettes/:id', () => {
     it('should return 202 if the correct params are sent', async () => {
-      const firstPalette = await db('palettes').first();
-      const { id } = firstPalette;
+      const { id } = await db('palettes').first();
       const response = await request(app)
         .patch(`/api/v1/palettes/${id}`)
         .send({ name: 'new palette name' });
       expect(response.status).toEqual(202);
     });
 
+    it('should edit the name of a palette in the database', async () => {
+      const expected = await db('palettes').first();
+      expect(expected.name).not.toEqual('new palette name');
+      await request(app)
+        .patch(`/api/v1/palettes/${expected.id}`)
+        .send({ name: 'new palette name' });
+      const [result] = await db('palettes').where({ id: expected.id });
+      expect(result.name).toEqual('new palette name');
+    });
+
     it('should return 422 if the name param is not sent', async () => {
-      const firstPalette = await db('palettes').first();
-      const { id } = firstPalette;
+      const { id } = await db('palettes').first();
       const response = await request(app)
         .patch(`/api/v1/palettes/${id}`)
         .send();
