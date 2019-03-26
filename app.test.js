@@ -229,4 +229,25 @@ describe('queries', () => {
       expect(response.status).toEqual(404);
     });
   });
+
+  describe('DELETE /api/v1/palettes/:id', () => {
+    it('should return 204 if a palette matches the id', async () => {
+      const { id } = await db('palettes').first();
+      const response = await request(app).delete(`/api/v1/palettes/${id}`);
+      expect(response.status).toEqual(204);
+    });
+
+    it('should remove a palette from the database', async () => {
+      const { id } = await db('palettes').first();
+      const palettesBefore = await db('palettes').select();
+      await request(app).delete(`/api/v1/palettes/${id}`);
+      const palettesAfter = await db('palettes').select();
+      expect(palettesAfter.length).toEqual(palettesBefore.length - 1);
+    });
+
+    it('should return 404 if no palette is found', async () => {
+      const response = await request(app).delete('/api/v1/palettes/0');
+      expect(response.status).toEqual(404);
+    });
+  });
 });
