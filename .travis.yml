@@ -1,9 +1,14 @@
 language: node_js
 node_js:
-  - node
+- node
 services:
-  - postgresql
+- postgresql
 before_script:
-  - psql -c 'create database palette_picker_test;' -U postgres
-  - npm run migrate
-  - npm run seed
+- psql -c 'create database palette_picker_test;' -U postgres
+- npm run migrate
+- npm run seed
+deploy:
+  provider: heroku
+  api_key:
+    secure: Z9RO1HDMOyZJpnkhZFk5Z4yd+LaP1blbsLjlCjWEvfn6553mjbteY9kg7JLp19WDFJyFTIiGVshnTYaCwObdrrTofw3bXhFV0JBZ5N4RO33Y2aJ9j4qBIfutlyk7OuoJT+RXx8hLYvkW40LkhW57uq9RH29vK0aRydVxfi804QmtIhUk0qsae6lIbwuF3vnM3l9nJN1Q4LVdV9888W9ADCqNAJx1mX3FDoRouvDmqnUy+ZG8MLfkM/Q9edScV1P7KFdq/JnzBU2Np1w1J2XVdsHBYYF/3zDp22pGUYMq08+1kfR23b/NuuHLAQkIwDCCVhORp5mtUEx9GHTxbJx4daZO95s+WgXyTCeoX+j8vPZb0zmiaFuG10QyCKxhJuxhtsDcdl8SMzxh2vTtOUqnkDjKAuEz6e24vg4hJ+JU6qmyhx914dcXhu1XGwFKjuuB+laTQpzJm8KRovIz6eUl/zWYPZF8QWQfJHst+wjf6sc0MjSJUGb+JMbxceNh6Thufvc/GAu3ero31+p1qcBF/utWrwWZpNWCadiisi7/gPQhL2tvuXU33rA8lnm7D80reoe43w/F3RMIaU/gBwsPFCsFjMvxWYO+D8dPy6nIGf4HU6a13plWi2/toZtvOHABcckEgMMf7pwjt1gES+cLJ1O/D5pFi6Lt+1OvAHb6WQ4=
+app: palette-picker-jd
