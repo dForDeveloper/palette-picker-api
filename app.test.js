@@ -85,4 +85,33 @@ describe('queries', () => {
       expect(response.status).toEqual(422);
     });
   });
+
+  describe('POST /api/v1/palettes', () => {
+    it('should return 201 and the palette id', async () => {
+      const firstProject = await db('projects').first();
+      const { id: project_id } = firstProject;
+      const mockPalette = {
+        name: 'palette q',
+        color1: '#000000',
+        color2: '#000000',
+        color3: '#000000',
+        color4: '#000000',
+        color5: '#000000',
+        project_id
+      };
+      const response = await request(app)
+        .post('/api/v1/palettes')
+        .send(mockPalette);
+      const palettes = await db('palettes').select();
+      expect(response.status).toEqual(201);
+      expect(palettes.pop().id).toEqual(response.body.id);
+    });
+
+    it('should return 422 if the correct params are missing', async () => {
+      const response = await request(app)
+        .post('/api/v1/palettes')
+        .send({});
+      expect(response.status).toEqual(422);
+    });
+  });
 });
