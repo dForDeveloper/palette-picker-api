@@ -141,4 +141,31 @@ describe('queries', () => {
       expect(response.status).toEqual(404);
     });
   });
+    
+  describe('PATCH /api/v1/palettes/:id', () => {
+    it('should return 202 if the correct params are sent', async () => {
+      const firstPalette = await db('palettes').first();
+      const { id } = firstPalette;
+      const response = await request(app)
+        .patch(`/api/v1/palettes/${id}`)
+        .send({ name: 'new palette name' });
+      expect(response.status).toEqual(202);
+    });
+
+    it('should return 422 if the name param is not sent', async () => {
+      const firstPalette = await db('palettes').first();
+      const { id } = firstPalette;
+      const response = await request(app)
+        .patch(`/api/v1/palettes/${id}`)
+        .send();
+      expect(response.status).toEqual(422);
+    });
+
+    it('should return 404 if no palette is found', async () => {
+      const response = await request(app)
+      .patch(`/api/v1/palettes/0`)
+      .send({ name: 'new palette name' });
+      expect(response.status).toEqual(404);
+    });
+  });
 });
