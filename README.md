@@ -1,6 +1,25 @@
 # Palette Picker API
 Palette Picker API is a REST API built with Node, Express, and PostgreSQL that hold projects and palettes for [Palette Picker]().
 
+## How to Contribute
+  - Fork the repo
+  - Open your terminal
+  - `cd` to where you want the repo directory to be created
+  - Clone your fork down to your machine either
+    - with SSH: `git clone git@github.com:`*yourusername*`/palette-picker-api.git`
+    - or with HTTPS: `git clone https://github.com/`*yourusername*`/palette-picker-api.git`
+  - `cd palette-picked-api`
+  - `npm install`
+  - `psql`
+  - `CREATE DATABASE palette_picker;`
+  - `CREATE DATABASE palette_picker_test;`
+  - `\q`
+  - `knex migrate:latest`
+  - `knex migrate:latest --env=test`
+  - `knex seed:run --env=test`
+  - `git push` any changes up to your fork
+  - Make pull requests from your fork to the original repo
+
 ## Database Schema
 
 ### Projects
