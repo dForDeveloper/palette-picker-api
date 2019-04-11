@@ -8,7 +8,7 @@ Palette Picker API is a REST API built with Node, Express, and PostgreSQL that h
   - Clone your fork down to your machine either
     - with SSH: `git clone git@github.com:`*yourusername*`/palette-picker-api.git`
     - or with HTTPS: `git clone https://github.com/`*yourusername*`/palette-picker-api.git`
-  - `cd palette-picked-api`
+  - `cd palette-picker-api`
   - `npm install`
   - `psql`
   - `CREATE DATABASE palette_picker;`
